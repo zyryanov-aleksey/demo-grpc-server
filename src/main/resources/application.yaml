@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: zyryal-grpc-demo-server
+  grpc:
+    server:
+      port: 9090
+      inbound:
+        message:
+          max-size: 150MB
+      reflection:
+        enabled: true
+      health:
+        enabled: true
+
+logging:
+  level:
+    root: INFO

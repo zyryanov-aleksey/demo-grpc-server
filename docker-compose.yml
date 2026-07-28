@@ -1,0 +1,9 @@
+services:
+  demo-grpc-server:
+    image: zyryal-grpc-demo-server:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${DEMO_GRPC_PORT:-9090}:9090"
+    restart: unless-stopped
