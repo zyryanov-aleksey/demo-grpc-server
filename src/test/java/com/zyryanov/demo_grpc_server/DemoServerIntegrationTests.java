@@ -31,16 +31,19 @@ import io.grpc.health.v1.HealthGrpc;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.grpc.test.autoconfigure.LocalGrpcServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = "spring.grpc.server.port=19091")
+@SpringBootTest
 class DemoServerIntegrationTests {
 
 	@Test
-	void servesHealthEchoAndDemonstrationMetadata() throws Exception {
-		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 19091)
+	void servesHealthEchoAndDemonstrationMetadata(
+			@LocalGrpcServerPort int serverPort) throws Exception {
+
+		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", serverPort)
 			.usePlaintext()
 			.build();
 		try {
