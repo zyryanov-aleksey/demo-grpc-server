@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zyryanov.demo_grpc_server.interceptor;
+package com.zyryanov.demogrpcserver.interceptor;
 
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.Metadata;
@@ -23,6 +23,8 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.grpc.server.GlobalServerInterceptor;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @GlobalServerInterceptor
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class DemoMetadataServerInterceptor implements ServerInterceptor {
 
 	private static final Metadata.Key<String> DEMO_SERVER_HEADER =
@@ -42,12 +45,16 @@ public class DemoMetadataServerInterceptor implements ServerInterceptor {
 	private static final Metadata.Key<String> REQUEST_ID =
 			Metadata.Key.of("x-request-id", Metadata.ASCII_STRING_MARSHALLER);
 
+	private static final Metadata.Key<byte[]> BINARY_CONTEXT =
+			Metadata.Key.of("x-demo-bin", Metadata.BINARY_BYTE_MARSHALLER);
+
 	@Override
 	public <RequestT, ResponseT> ServerCall.Listener<RequestT> interceptCall(
 			ServerCall<RequestT, ResponseT> call, Metadata requestHeaders,
 			ServerCallHandler<RequestT, ResponseT> next) {
 
 		String requestId = requestHeaders.get(REQUEST_ID);
+		byte[] binaryContext = requestHeaders.get(BINARY_CONTEXT);
 		ServerCall<RequestT, ResponseT> metadataCall =
 				new SimpleForwardingServerCall<>(call) {
 					@Override
@@ -55,6 +62,9 @@ public class DemoMetadataServerInterceptor implements ServerInterceptor {
 						responseHeaders.put(DEMO_SERVER_HEADER, "zyryal-grpc-demo");
 						if (requestId != null) {
 							responseHeaders.put(REQUEST_ID, requestId);
+						}
+						if (binaryContext != null) {
+							responseHeaders.put(BINARY_CONTEXT, binaryContext);
 						}
 						super.sendHeaders(responseHeaders);
 					}

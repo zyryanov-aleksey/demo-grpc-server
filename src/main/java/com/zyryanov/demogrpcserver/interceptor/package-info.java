@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.zyryanov.demo_grpc_server;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 /**
- * Запустить автономный демонстрационный gRPC-сервер.
+ * Серверные interceptor-компоненты демонстрационного gRPC-сервера.
  */
-@SpringBootApplication
-public class DemoGrpcServerApplication {
+@NullMarked
+package com.zyryanov.demogrpcserver.interceptor;
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemoGrpcServerApplication.class, args);
-	}
-
-}
+import org.jspecify.annotations.NullMarked;

@@ -1,0 +1,197 @@
+syntax = "proto3";
+
+package demo.types.v1;
+
+option java_multiple_files = true;
+option java_package = "com.zyryanov.demo_grpc_server.proto.types.v1";
+option java_outer_classname = "TypesProto";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/api.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/source_context.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/type.proto";
+import "google/protobuf/wrappers.proto";
+
+// Демонстрирует сериализацию protobuf-типов без дополнительной бизнес-логики.
+service TypesService {
+  // Возвращает сообщение со всеми основными формами protobuf-полей.
+  rpc EchoAllTypes(AllTypes) returns (AllTypes);
+
+  // Возвращает сообщение с официальными Well-Known Types.
+  rpc EchoWellKnownTypes(WellKnownTypes) returns (WellKnownTypes);
+}
+
+// Состояние для демонстрации enum-поля.
+enum ExampleState {
+  EXAMPLE_STATE_UNSPECIFIED = 0;
+  EXAMPLE_STATE_ENABLED = 1;
+  EXAMPLE_STATE_DISABLED = 2;
+}
+
+// Вложенное сообщение для одиночных и repeated message-полей.
+message NestedMessage {
+  string value = 1 [
+    (buf.validate.field).string = {
+      max_len: 200
+      example: "nested"
+    }
+  ];
+}
+
+// Сообщение со всеми scalar-типами и основными формами protobuf-полей.
+message AllTypes {
+  double double_value = 1 [
+    (buf.validate.field).double = {
+      finite: true
+      example: 12.5
+    }
+  ];
+  float float_value = 2 [
+    (buf.validate.field).float = {
+      finite: true
+      example: 3.25
+    }
+  ];
+  int32 int32_value = 3 [
+    (buf.validate.field).int32 = {
+      gte: -1000
+      lte: 1000
+      example: 42
+    }
+  ];
+  int64 int64_value = 4 [
+    (buf.validate.field).int64 = {
+      gte: -1000000
+      lte: 1000000
+      example: 900
+    }
+  ];
+  uint32 uint32_value = 5 [
+    (buf.validate.field).uint32 = {
+      lte: 1000000
+      example: 7
+    }
+  ];
+  uint64 uint64_value = 6 [
+    (buf.validate.field).uint64 = {
+      lte: 1000000
+      example: 8
+    }
+  ];
+  sint32 sint32_value = 7 [(buf.validate.field).sint32.example = -2];
+  sint64 sint64_value = 8 [(buf.validate.field).sint64.example = -3];
+  fixed32 fixed32_value = 9 [(buf.validate.field).fixed32.example = 4];
+  fixed64 fixed64_value = 10 [(buf.validate.field).fixed64.example = 5];
+  sfixed32 sfixed32_value = 11 [(buf.validate.field).sfixed32.example = -6];
+  sfixed64 sfixed64_value = 12 [(buf.validate.field).sfixed64.example = -7];
+  bool bool_value = 13 [(buf.validate.field).bool.example = true];
+  string string_value = 14 [
+    (buf.validate.field).string = {
+      max_len: 200
+      example: "sample"
+    }
+  ];
+  bytes bytes_value = 15 [
+    (buf.validate.field).bytes = {
+      max_len: 1048576
+      example: "AQI="
+    }
+  ];
+
+  optional string optional_value = 16 [
+    (buf.validate.field).string = {
+      max_len: 200
+      example: "optional"
+    }
+  ];
+  repeated string repeated_values = 17 [
+    (buf.validate.field).repeated = {
+      max_items: 20
+      items: {
+        string: {
+          max_len: 200
+          example: "one"
+        }
+      }
+    }
+  ];
+  map<string, int32> map_values = 18 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          max_len: 100
+          example: "answer"
+        }
+      }
+      values: {
+        int32: {
+          example: 42
+        }
+      }
+    }
+  ];
+  ExampleState enum_value = 19 [
+    (buf.validate.field).enum = {
+      defined_only: true
+      example: 1
+    }
+  ];
+  optional NestedMessage message_value = 20;
+
+  oneof selected_value {
+    string selected_string_value = 21 [
+      (buf.validate.field).string.example = "selected"
+    ];
+    int32 selected_int32_value = 22 [
+      (buf.validate.field).int32.example = 10
+    ];
+  }
+
+  repeated NestedMessage repeated_message_values = 23 [
+    (buf.validate.field).repeated.max_items = 10
+  ];
+}
+
+// Сообщение, покрывающее официальный набор google.protobuf Well-Known Types.
+message WellKnownTypes {
+  google.protobuf.DoubleValue double_value = 1;
+  google.protobuf.FloatValue float_value = 2;
+  google.protobuf.Int32Value int32_value = 3;
+  google.protobuf.Int64Value int64_value = 4;
+  google.protobuf.UInt32Value uint32_value = 5;
+  google.protobuf.UInt64Value uint64_value = 6;
+  google.protobuf.BoolValue bool_value = 7;
+  google.protobuf.StringValue string_value = 8;
+  google.protobuf.BytesValue bytes_value = 9;
+  google.protobuf.Timestamp timestamp = 10;
+  google.protobuf.Duration duration = 11;
+  google.protobuf.FieldMask field_mask = 12;
+  google.protobuf.Syntax syntax = 13;
+  google.protobuf.Field.Kind kind = 14;
+  google.protobuf.Field.Cardinality cardinality = 15;
+  optional google.protobuf.NullValue null_value = 16;
+
+  google.protobuf.Struct struct_value = 17;
+  google.protobuf.Value dynamic_value = 18;
+  google.protobuf.ListValue list_value = 19;
+  google.protobuf.Empty empty_value = 20;
+  google.protobuf.Any any_value = 21;
+
+  google.protobuf.Api api = 22;
+  google.protobuf.Method method = 23;
+  google.protobuf.Mixin mixin = 24;
+  google.protobuf.Type type_model = 25;
+  google.protobuf.Field field_model = 26;
+  google.protobuf.Enum enum_model = 27;
+  google.protobuf.EnumValue enum_value = 28;
+  google.protobuf.Option option = 29;
+  google.protobuf.SourceContext source_context = 30;
+  optional google.protobuf.Syntax optional_syntax = 31;
+}

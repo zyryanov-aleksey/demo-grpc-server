@@ -15,9 +15,9 @@
  */
 
 /**
- * Демонстрационная реализация службы gRPC.
+ * Реализации независимых демонстрационных служб gRPC.
  */
 @NullMarked
-package com.zyryanov.demo_grpc_server.service;
+package com.zyryanov.demogrpcserver.service;
 
 import org.jspecify.annotations.NullMarked;

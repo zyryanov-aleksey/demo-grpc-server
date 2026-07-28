@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package demo.streaming.v1;
+
+option java_multiple_files = true;
+option java_package = "com.zyryanov.demo_grpc_server.proto.streaming.v1";
+option java_outer_classname = "StreamingProto";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// Демонстрирует четыре формы gRPC streaming и ошибку в открытом потоке.
+service StreamingService {
+  // Отправляет клиенту заданное число ответов на один запрос.
+  rpc ServerStream(ServerStreamRequest) returns (stream StreamResponse);
+
+  // Собирает клиентский поток в итоговую сводку.
+  rpc ClientStream(stream StreamRequest) returns (ClientStreamResponse);
+
+  // Возвращает отдельный ответ на каждое сообщение двунаправленного потока.
+  rpc BidirectionalStream(stream StreamRequest) returns (stream StreamResponse);
+
+  // Отправляет несколько ответов, после чего завершает поток ошибкой.
+  rpc PartialFailure(PartialFailureRequest) returns (stream StreamResponse);
+}
+
+// Один элемент входящего клиентского потока.
+message StreamRequest {
+  string message = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+      example: "hello"
+    }
+  ];
+}
+
+// Запрос на создание серверного потока.
+message ServerStreamRequest {
+  string message = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+      example: "hello"
+    }
+  ];
+  optional uint32 response_count = 2 [
+    (buf.validate.field).uint32 = {
+      gte: 1
+      lte: 100
+      example: 3
+    }
+  ];
+}
+
+// Один элемент исходящего серверного потока.
+message StreamResponse {
+  string message = 1;
+  uint32 sequence = 2;
+  google.protobuf.Timestamp sent_at = 3;
+}
+
+// Итог обработки клиентского потока.
+message ClientStreamResponse {
+  uint32 request_count = 1;
+  repeated string messages = 2;
+}
+
+// Запрос потока, который должен завершиться частичной ошибкой.
+message PartialFailureRequest {
+  string message = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+      example: "accepted before failure"
+    }
+  ];
+  optional uint32 successful_response_count = 2 [
+    (buf.validate.field).uint32 = {
+      gte: 1
+      lte: 10
+      example: 2
+    }
+  ];
+}

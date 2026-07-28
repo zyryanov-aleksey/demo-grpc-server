@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package demo.error.v1;
+
+option java_multiple_files = true;
+option java_package = "com.zyryanov.demo_grpc_server.proto.error.v1";
+option java_outer_classname = "ErrorProto";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Демонстрирует простые и rich gRPC-ошибки, deadline и UNIMPLEMENTED.
+service ErrorService {
+  // Возвращает простую ошибку INVALID_ARGUMENT.
+  rpc SimpleFailure(FailureRequest) returns (google.protobuf.Empty);
+
+  // Возвращает INVALID_ARGUMENT с custom и стандартными error details.
+  rpc RichFailure(FailureRequest) returns (google.protobuf.Empty);
+
+  // Завершается успешно после задержки и позволяет проверить deadline/cancellation.
+  rpc DelayedResponse(DelayRequest) returns (DelayResponse);
+
+  // Намеренно не реализован сервером и возвращает UNIMPLEMENTED.
+  rpc NotImplemented(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+// Параметры демонстрационной ошибки.
+message FailureRequest {
+  string message = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+      example: "invalid input"
+    }
+  ];
+  optional string field = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      example: "message"
+    }
+  ];
+  optional string request_id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      example: "req-42"
+    }
+  ];
+}
+
+// Custom payload для rich error details.
+message DemoErrorDetail {
+  string reason = 1;
+  string field = 2;
+  string request_id = 3;
+}
+
+// Запрос с управляемой задержкой.
+message DelayRequest {
+  uint32 delay_millis = 1 [
+    (buf.validate.field).uint32 = {
+      gte: 1
+      lte: 10000
+      example: 250
+    }
+  ];
+  string payload = 2 [
+    (buf.validate.field).string = {
+      max_len: 500
+      example: "deadline demo"
+    }
+  ];
+}
+
+// Успешный ответ после задержки.
+message DelayResponse {
+  string payload = 1;
+  uint32 elapsed_millis = 2;
+  google.protobuf.Timestamp completed_at = 3;
+}

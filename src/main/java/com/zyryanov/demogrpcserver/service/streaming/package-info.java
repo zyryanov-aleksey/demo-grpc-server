@@ -15,9 +15,9 @@
  */
 
 /**
- * Серверные interceptor-компоненты демонстрационного gRPC-сервера.
+ * Примеры четырёх форм gRPC streaming.
  */
 @NullMarked
-package com.zyryanov.demo_grpc_server.interceptor;
+package com.zyryanov.demogrpcserver.service.streaming;
 
 import org.jspecify.annotations.NullMarked;

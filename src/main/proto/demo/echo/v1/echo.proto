@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package demo.echo.v1;
+
+option java_multiple_files = true;
+option java_package = "com.zyryanov.demo_grpc_server.proto.echo.v1";
+option java_outer_classname = "EchoProto";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Демонстрирует простой unary-вызов и пустые protobuf-сообщения.
+service EchoService {
+  // Возвращает переданные данные вместе со временем обработки на сервере.
+  rpc Echo(EchoRequest) returns (EchoResponse);
+
+  // Возвращает пустой успешный ответ на пустой запрос.
+  rpc EmptyCall(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+// Запрос с основными формами полей, удобными для ручных экспериментов.
+message EchoRequest {
+  string message = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+      example: "hello"
+    }
+  ];
+
+  repeated string labels = 2 [
+    (buf.validate.field).repeated = {
+      max_items: 10
+      items: {
+        string: {
+          max_len: 32
+          example: "greeting"
+        }
+      }
+    }
+  ];
+
+  map<string, string> attributes = 3 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          max_len: 32
+          example: "source"
+        }
+      }
+      values: {
+        string: {
+          max_len: 100
+          example: "demo"
+        }
+      }
+    }
+  ];
+
+  oneof selector {
+    // Текстовый вариант oneof.
+    string text = 4 [(buf.validate.field).string.example = "primary"];
+
+    // Числовой вариант oneof.
+    int64 number = 5 [(buf.validate.field).int64.example = 42];
+  }
+
+  optional google.protobuf.Timestamp sent_at = 6;
+  optional google.protobuf.Duration ttl = 7;
+}
+
+// Ответ, сохраняющий переданные формы полей.
+message EchoResponse {
+  string message = 1;
+  repeated string labels = 2;
+  map<string, string> attributes = 3;
+
+  oneof selector {
+    string text = 4;
+    int64 number = 5;
+  }
+
+  optional google.protobuf.Timestamp sent_at = 6;
+  optional google.protobuf.Duration ttl = 7;
+  google.protobuf.Timestamp received_at = 8;
+}
