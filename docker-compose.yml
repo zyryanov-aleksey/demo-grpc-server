@@ -5,5 +5,4 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${DEMO_GRPC_PORT:-9090}:9090"
-    restart: unless-stopped
+      - "9090:9090"
